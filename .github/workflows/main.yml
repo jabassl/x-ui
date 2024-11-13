@@ -17,12 +17,15 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget curl unzip
+          sudo apt-get install -y wget curl unzip jq
 
       - name: Download and Run x-ui Install Script
         run: |
-          curl -Ls -o install.sh https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh
-          sudo bash install.sh
+          bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+
+      - name: Start x-ui Service
+        run: |
+          sudo systemctl status x-ui || true  # Output service status for troubleshooting
 
       - name: Configure x-ui
         run: |
