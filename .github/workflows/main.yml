@@ -21,10 +21,13 @@ jobs:
 
       - name: Download and Run x-ui Install Script
         run: |
-          bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+          sudo bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
 
       - name: Start x-ui Service
         run: |
+          sudo systemctl daemon-reload
+          sudo systemctl enable x-ui
+          sudo systemctl start x-ui
           sudo systemctl status x-ui || true  # Output service status for troubleshooting
 
       - name: Configure x-ui
@@ -50,10 +53,4 @@ jobs:
           # Authenticate with ngrok
           ngrok authtoken $NGROK_TOKEN
 
-          # Start ngrok to expose the x-ui panel on port 2020
-          nohup ngrok tcp 2020 &
-
-      - name: Display ngrok URL
-        run: |
-          sleep 5  # Wait for ngrok to initialize
-          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url'
+          # Start ngrok to
