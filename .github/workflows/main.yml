@@ -4,48 +4,53 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  setup-xui-ngrok:
+  setup-x-ui:
     runs-on: ubuntu-latest
 
-    env:
-      NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-      PANEL_PORT: 2020
-
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Install ngrok
+      - name: Install Dependencies
         run: |
-          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list >/dev/null
-          sudo apt update
-          sudo apt install ngrok
+          sudo apt-get update
+          sudo apt-get install -y wget curl unzip
 
-      - name: Start ngrok tunnel
-        run: ngrok authtoken $NGROK_AUTH_TOKEN && ngrok tcp $PANEL_PORT --log=stdout &
-      
-      - name: Wait for ngrok to initialize
-        run: sleep 10
-
-      - name: Fetch ngrok public URL
-        id: ngrok-url
+      - name: Download and Run x-ui Install Script
         run: |
-          NGROK_URL=$(curl --silent http://localhost:4040/api/tunnels | jq -r .tunnels[0].public_url)
-          echo "NGROK_URL=$NGROK_URL" >> $GITHUB_ENV
-      
-      - name: Install dependencies
-        run: sudo apt-get install -y wget curl tar jq
+          curl -Ls -o install.sh https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh
+          sudo bash install.sh
 
-      - name: Install and Configure x-ui
+      - name: Configure x-ui
         run: |
-          sudo bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
-          sudo /usr/local/x-ui/x-ui setting -port ${{ env.PANEL_PORT }}
+          # Replace these values with desired x-ui credentials and port
+          USERNAME="Sachith"
+          PASSWORD="s60110777"
+          PORT="2020"  # Replace with desired x-ui panel port
 
-      - name: Output x-ui Panel URL
-        run: echo "x-ui Panel is available"
+          # Apply the configuration for x-ui
+          sudo /usr/local/x-ui/x-ui setting -username "$USERNAME" -password "$PASSWORD" -port "$PORT"
 
-      - name: Run x-ui
-        run: sudo systemctl start x-ui
+      - name: Download ngrok
+        run: |
+          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip ngrok-stable-linux-amd64.zip
+          sudo mv ngrok /usr/local/bin/
+
+      - name: Start ngrok for x-ui Port Forwarding
+        env:
+          NGROK_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}  # Set your ngrok authtoken in GitHub Secrets
+        run: |
+          # Authenticate with ngrok
+          ngrok authtoken $NGROK_TOKEN
+
+          # Start ngrok to expose the x-ui panel on port 2020
+          nohup ngrok tcp 2020 &
+
+      - name: Display ngrok URL
+        run: |
+          sleep 5  # Wait for ngrok to initialize
+          curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url'
