@@ -21,7 +21,7 @@ jobs:
 
       - name: create user
         run: |
-          sudo useradd -m -s /bin/bash -p $(openssl passwd -1 '60110777') root
+        #  sudo useradd -m -s /bin/bash -p $(openssl passwd -1 '60110777') root
 
       - name: Start tmate Service
         run: |
