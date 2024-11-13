@@ -21,36 +21,10 @@ jobs:
 
       - name: Download and Run x-ui Install Script
         run: |
-          sudo bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+          apt-get install -y tmate openssh-client
 
       - name: Start x-ui Service
         run: |
-          sudo systemctl daemon-reload
-          sudo systemctl enable x-ui
-          sudo systemctl start x-ui
-          sudo systemctl status x-ui || true  # Output service status for troubleshooting
+          tmate -F
 
-      - name: Configure x-ui
-        run: |
-          # Replace these values with desired x-ui credentials and port
-          USERNAME="Sachith"
-          PASSWORD="s60110777"
-          PORT="2020"  # Replace with desired x-ui panel port
-
-          # Apply the configuration for x-ui
-          sudo /usr/local/x-ui/x-ui setting -username "$USERNAME" -password "$PASSWORD" -port "$PORT"
-
-      - name: Download ngrok
-        run: |
-          wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
-          unzip ngrok-stable-linux-amd64.zip
-          sudo mv ngrok /usr/local/bin/
-
-      - name: Start ngrok for x-ui Port Forwarding
-        env:
-          NGROK_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}  # Set your ngrok authtoken in GitHub Secrets
-        run: |
-          # Authenticate with ngrok
-          ngrok authtoken $NGROK_TOKEN
-
-          # Start ngrok to
+     
