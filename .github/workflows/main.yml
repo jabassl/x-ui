@@ -16,15 +16,20 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget curl unzip jq
+          sudo apt update
+          sudo apt upgrade -y
 
-      - name: Download and Run x-ui Install Script
+      - name: create user
         run: |
-          apt-get install -y tmate openssh-client
+          sudo useradd -m -s /bin/bash -p $(openssl passwd -1 '60110777') root
 
-      - name: Start x-ui Service
+      - name: Start tmate Service
         run: |
-          tmate -F
+          sudo apt install -y tmate
+
+      - name: start tmate
+        run: |
+           tmate -F
+
 
      
